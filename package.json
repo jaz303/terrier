@@ -1,0 +1,24 @@
+{
+  "name": "terrier",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jaz303/terrier.git"
+  },
+  "author": "Jason Frame <jason@onehackoranother.com> (http://jasonframe.co.uk)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaz303/terrier/issues"
+  },
+  "homepage": "https://github.com/jaz303/terrier",
+  "devDependencies": {
+    "tape": "~2.12.3",
+    "uglify-js": "~2.4.13"
+  },
+  "dependencies": {}
+}
