@@ -1,74 +1,74 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = terrier;
 
-var doc 		= (typeof document !== 'undefined') ? document : null;
-var mapperFn 	= function(el) { return el; }
-var EMPTY 		= {};
+var doc         = (typeof document !== 'undefined') ? document : null;
+var mapperFn    = function(el) { return el; }
+var EMPTY       = {};
 
 module.exports.setDocument = function(_doc) {
-	doc = _doc;
+    doc = _doc;
 }
 
 module.exports.setNodeMapper = function(_fn) {
-	mapperFn = _fn;
+    mapperFn = _fn;
 }
 
 function terrier(html, opts) {
 
-	opts = opts || EMPTY;
+    opts = opts || EMPTY;
 
-	var map = opts.mapNode || mapperFn;
-	var el 	= templateToNode(html);
+    var map = opts.mapNode || mapperFn;
+    var el  = templateToNode(html);
 
-	var plucked = pluckDesignatedElements(el, map);
-	plucked.root = map(el);
+    var plucked = pluckDesignatedElements(el, map);
+    plucked.root = map(el);
 
-	return plucked;
+    return plucked;
 
 }
 
 function templateToNode(html) {
-	var wrapper = doc.createElement('div');
-	wrapper.innerHTML = html;
-	for (var i = 0, l = wrapper.childNodes.length; i < l; ++i) {
-		if (wrapper.childNodes[i].nodeType === 1) {
-			return wrapper.childNodes[i];
-		}
-	}
-	return null;
+    var wrapper = doc.createElement('div');
+    wrapper.innerHTML = html;
+    for (var i = 0, l = wrapper.childNodes.length; i < l; ++i) {
+        if (wrapper.childNodes[i].nodeType === 1) {
+            return wrapper.childNodes[i];
+        }
+    }
+    return null;
 }
 
 function pluckDesignatedElements(root, map) {
 
-	var plucked = {};
+    var plucked = {};
 
-	function _addOne(k, el) {
-		if (k.substr(-2, 2) === '[]') {
-			k = k.slice(0, -2);
-			if (!(k in plucked))
-				plucked[k] = [];
-			if (!Array.isArray(plucked[k]))
-				throw new Error("type mismatch - existing element for plucked key '" + k + "' is not an array");
-			plucked[k].push(map(el));
-		} else {
-			plucked[k] = map(el);
-		}
-	}
+    function _addOne(k, el) {
+        if (k.substr(-2, 2) === '[]') {
+            k = k.slice(0, -2);
+            if (!(k in plucked))
+                plucked[k] = [];
+            if (!Array.isArray(plucked[k]))
+                throw new Error("type mismatch - existing element for plucked key '" + k + "' is not an array");
+            plucked[k].push(map(el));
+        } else {
+            plucked[k] = map(el);
+        }
+    }
 
-	var els = root.querySelectorAll('[data-pluck]');
-	for (var i = 0; i < els.length; ++i) {
-		var el = els[i];
-		var key = el.getAttribute('data-pluck');
-		if (key.indexOf(' ') >= 0) {
-			key.trim().split(/\s+/).forEach(function(k) {
-				_addOne(k, el);
-			});
-		} else {
-			_addOne(key, el);
-		}
-	}
+    var els = root.querySelectorAll('[data-pluck]');
+    for (var i = 0; i < els.length; ++i) {
+        var el = els[i];
+        var key = el.getAttribute('data-pluck');
+        if (key.indexOf(' ') >= 0) {
+            key.trim().split(/\s+/).forEach(function(k) {
+                _addOne(k, el);
+            });
+        } else {
+            _addOne(key, el);
+        }
+    }
 
-	return plucked;
+    return plucked;
 
 }
 },{}],2:[function(require,module,exports){
@@ -1345,36 +1345,36 @@ var terrier = require('../');
 var test = require('tape');
 
 var TEMPLATE = [
-	"<div data-pluck='foo' id='foo'>",
-	"  <ul>",
-	"    <li data-pluck='list[] a' id='a'></li>",
-	"    <li data-pluck='list[] b' id='b'></li>",
-	"    <li data-pluck='list[] c' id='c'></li>",
-	"  </ul>",
-	"  <div><a href='#'><span><b id='nested' data-pluck='nested'></b></span></a></div>",
-	"</div>"
+    "<div data-pluck='foo' id='foo'>",
+    "  <ul>",
+    "    <li data-pluck='list[] a' id='a'></li>",
+    "    <li data-pluck='list[] b' id='b'></li>",
+    "    <li data-pluck='list[] c' id='c'></li>",
+    "  </ul>",
+    "  <div><a href='#'><span><b id='nested' data-pluck='nested'></b></span></a></div>",
+    "</div>"
 ].join("\n");
 
 window.init = function() {
-	test("create template", function(assert) {
+    test("create template", function(assert) {
 
-		var instance = terrier(TEMPLATE);
+        var instance = terrier(TEMPLATE);
 
-		assert.equal(instance.root.id, "foo");
-		
-		assert.equal(instance.a.id, 'a');
-		assert.equal(instance.b.id, 'b');
-		assert.equal(instance.c.id, 'c');
+        assert.equal(instance.root.id, "foo");
+        
+        assert.equal(instance.a.id, 'a');
+        assert.equal(instance.b.id, 'b');
+        assert.equal(instance.c.id, 'c');
 
-		assert.equal(instance.list[0].id, 'a');
-		assert.equal(instance.list[1].id, 'b');
-		assert.equal(instance.list[2].id, 'c');
+        assert.equal(instance.list[0].id, 'a');
+        assert.equal(instance.list[1].id, 'b');
+        assert.equal(instance.list[2].id, 'c');
 
-		assert.equal(instance.nested.id, 'nested');
+        assert.equal(instance.nested.id, 'nested');
 
-		assert.end();
+        assert.end();
 
-	});
+    });
 }
 },{"../":1,"tape":2}],15:[function(require,module,exports){
 /*!
@@ -2491,123 +2491,123 @@ function assert (test, message) {
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
-	'use strict';
+    'use strict';
 
   var Arr = (typeof Uint8Array !== 'undefined')
     ? Uint8Array
     : Array
 
-	var ZERO   = '0'.charCodeAt(0)
-	var PLUS   = '+'.charCodeAt(0)
-	var SLASH  = '/'.charCodeAt(0)
-	var NUMBER = '0'.charCodeAt(0)
-	var LOWER  = 'a'.charCodeAt(0)
-	var UPPER  = 'A'.charCodeAt(0)
+    var ZERO   = '0'.charCodeAt(0)
+    var PLUS   = '+'.charCodeAt(0)
+    var SLASH  = '/'.charCodeAt(0)
+    var NUMBER = '0'.charCodeAt(0)
+    var LOWER  = 'a'.charCodeAt(0)
+    var UPPER  = 'A'.charCodeAt(0)
 
-	function decode (elt) {
-		var code = elt.charCodeAt(0)
-		if (code === PLUS)
-			return 62 // '+'
-		if (code === SLASH)
-			return 63 // '/'
-		if (code < NUMBER)
-			return -1 //no match
-		if (code < NUMBER + 10)
-			return code - NUMBER + 26 + 26
-		if (code < UPPER + 26)
-			return code - UPPER
-		if (code < LOWER + 26)
-			return code - LOWER + 26
-	}
+    function decode (elt) {
+        var code = elt.charCodeAt(0)
+        if (code === PLUS)
+            return 62 // '+'
+        if (code === SLASH)
+            return 63 // '/'
+        if (code < NUMBER)
+            return -1 //no match
+        if (code < NUMBER + 10)
+            return code - NUMBER + 26 + 26
+        if (code < UPPER + 26)
+            return code - UPPER
+        if (code < LOWER + 26)
+            return code - LOWER + 26
+    }
 
-	function b64ToByteArray (b64) {
-		var i, j, l, tmp, placeHolders, arr
+    function b64ToByteArray (b64) {
+        var i, j, l, tmp, placeHolders, arr
 
-		if (b64.length % 4 > 0) {
-			throw new Error('Invalid string. Length must be a multiple of 4')
-		}
+        if (b64.length % 4 > 0) {
+            throw new Error('Invalid string. Length must be a multiple of 4')
+        }
 
-		// the number of equal signs (place holders)
-		// if there are two placeholders, than the two characters before it
-		// represent one byte
-		// if there is only one, then the three characters before it represent 2 bytes
-		// this is just a cheap hack to not do indexOf twice
-		var len = b64.length
-		placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
+        // the number of equal signs (place holders)
+        // if there are two placeholders, than the two characters before it
+        // represent one byte
+        // if there is only one, then the three characters before it represent 2 bytes
+        // this is just a cheap hack to not do indexOf twice
+        var len = b64.length
+        placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
 
-		// base64 is 4/3 + up to two characters of the original data
-		arr = new Arr(b64.length * 3 / 4 - placeHolders)
+        // base64 is 4/3 + up to two characters of the original data
+        arr = new Arr(b64.length * 3 / 4 - placeHolders)
 
-		// if there are placeholders, only get up to the last complete 4 chars
-		l = placeHolders > 0 ? b64.length - 4 : b64.length
+        // if there are placeholders, only get up to the last complete 4 chars
+        l = placeHolders > 0 ? b64.length - 4 : b64.length
 
-		var L = 0
+        var L = 0
 
-		function push (v) {
-			arr[L++] = v
-		}
+        function push (v) {
+            arr[L++] = v
+        }
 
-		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
-			push((tmp & 0xFF0000) >> 16)
-			push((tmp & 0xFF00) >> 8)
-			push(tmp & 0xFF)
-		}
+        for (i = 0, j = 0; i < l; i += 4, j += 3) {
+            tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+            push((tmp & 0xFF0000) >> 16)
+            push((tmp & 0xFF00) >> 8)
+            push(tmp & 0xFF)
+        }
 
-		if (placeHolders === 2) {
-			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
-			push(tmp & 0xFF)
-		} else if (placeHolders === 1) {
-			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
-			push((tmp >> 8) & 0xFF)
-			push(tmp & 0xFF)
-		}
+        if (placeHolders === 2) {
+            tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+            push(tmp & 0xFF)
+        } else if (placeHolders === 1) {
+            tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+            push((tmp >> 8) & 0xFF)
+            push(tmp & 0xFF)
+        }
 
-		return arr
-	}
+        return arr
+    }
 
-	function uint8ToBase64 (uint8) {
-		var i,
-			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
-			output = "",
-			temp, length
+    function uint8ToBase64 (uint8) {
+        var i,
+            extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+            output = "",
+            temp, length
 
-		function encode (num) {
-			return lookup.charAt(num)
-		}
+        function encode (num) {
+            return lookup.charAt(num)
+        }
 
-		function tripletToBase64 (num) {
-			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
-		}
+        function tripletToBase64 (num) {
+            return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+        }
 
-		// go through the array every three bytes, we'll deal with trailing stuff later
-		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
-			output += tripletToBase64(temp)
-		}
+        // go through the array every three bytes, we'll deal with trailing stuff later
+        for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+            temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+            output += tripletToBase64(temp)
+        }
 
-		// pad the end with zeros, but make sure to not forget the extra bytes
-		switch (extraBytes) {
-			case 1:
-				temp = uint8[uint8.length - 1]
-				output += encode(temp >> 2)
-				output += encode((temp << 4) & 0x3F)
-				output += '=='
-				break
-			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
-				output += encode(temp >> 10)
-				output += encode((temp >> 4) & 0x3F)
-				output += encode((temp << 2) & 0x3F)
-				output += '='
-				break
-		}
+        // pad the end with zeros, but make sure to not forget the extra bytes
+        switch (extraBytes) {
+            case 1:
+                temp = uint8[uint8.length - 1]
+                output += encode(temp >> 2)
+                output += encode((temp << 4) & 0x3F)
+                output += '=='
+                break
+            case 2:
+                temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+                output += encode(temp >> 10)
+                output += encode((temp >> 4) & 0x3F)
+                output += encode((temp << 2) & 0x3F)
+                output += '='
+                break
+        }
 
-		return output
-	}
+        return output
+    }
 
-	module.exports.toByteArray = b64ToByteArray
-	module.exports.fromByteArray = uint8ToBase64
+    module.exports.toByteArray = b64ToByteArray
+    module.exports.fromByteArray = uint8ToBase64
 }())
 
 },{}],17:[function(require,module,exports){
