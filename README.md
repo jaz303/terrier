@@ -38,7 +38,17 @@ Into this (wherein `#<...>` denotes a real DOM element):
 
 ### Browserify
 
-    $ npm install terrier
+Get it:
+
+```shell
+$ npm install terrier
+```
+
+Require it:
+
+```javascript
+var terrier = require('terrier');
+```
 
 ### UMD
 
