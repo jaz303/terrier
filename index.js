@@ -1,7 +1,8 @@
 module.exports = terrier;
 
 var doc         = (typeof document !== 'undefined') ? document : null;
-var mapperFn    = function(el) { return el; }
+var mapperFn    = function(el) { return el; };
+var ATTR        = 'data-pluck';
 var EMPTY       = {};
 
 module.exports.setDocument = function(_doc) {
@@ -17,9 +18,10 @@ function terrier(html, opts) {
     opts = opts || EMPTY;
 
     var map = opts.mapNode || mapperFn;
+    var attr = opts.attribute || ATTR;
     var el  = templateToNode(html);
 
-    var plucked = pluckDesignatedElements(el, map);
+    var plucked = pluckDesignatedElements(el, attr, map);
     plucked.root = map(el);
 
     return plucked;
@@ -37,7 +39,7 @@ function templateToNode(html) {
     return null;
 }
 
-function pluckDesignatedElements(root, map) {
+function pluckDesignatedElements(root, attr, map) {
 
     var plucked = {};
 
@@ -54,10 +56,10 @@ function pluckDesignatedElements(root, map) {
         }
     }
 
-    var els = root.querySelectorAll('[data-pluck]');
+    var els = root.querySelectorAll('[' + attr + ']');
     for (var i = 0; i < els.length; ++i) {
         var el = els[i];
-        var key = el.getAttribute('data-pluck');
+        var key = el.getAttribute(attr);
         if (key.indexOf(' ') >= 0) {
             key.trim().split(/\s+/).forEach(function(k) {
                 _addOne(k, el);

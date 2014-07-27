@@ -1,6 +1,6 @@
 # terrier
 
-`terrier` is a light-weight DOM template loader and element plucker. It creates a DOM node from a string of HTML and plucks any elements with the attribute `data-pluck`, return them in a dictionary.
+`terrier` is a light-weight DOM template loader and element plucker. It creates a DOM node from a string of HTML and plucks any elements with the attribute `data-pluck`, returning them in a dictionary.
 
 `terrier` should work in all browsers that support `querySelectorAll()`.
 
@@ -66,6 +66,7 @@ Returns the dictionary of plucked elements, including an additional `root` entry
 
 Supported `options`:
 
+  * `attribute`: name of attribute used to denote elements to be plucked into the returned structure. Defaults to `data-pluck`.
   * `mapNode`: a callback that may be used to map each plucked element. Defaults to the identity.
 
 ## Copyright &amp; License
