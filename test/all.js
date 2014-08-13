@@ -13,7 +13,7 @@ var TEMPLATE = [
 ].join("\n");
 
 window.init = function() {
-    test("create template", function(assert) {
+    test("create instance", function(assert) {
 
         var instance = terrier(TEMPLATE);
 
@@ -28,6 +28,25 @@ window.init = function() {
         assert.equal(instance.list[2].id, 'c');
 
         assert.equal(instance.nested.id, 'nested');
+
+        assert.end();
+
+    });
+
+    test("compile template", function(assert) {
+
+        var tpl = terrier.compile("<div><h1 data-pluck='title'></h1></div>");
+
+        var i1 = tpl.instance();
+        var i2 = tpl.instance();
+
+        assert.equal(i1.root.nodeName.toLowerCase(), 'div');
+        assert.equal(i2.root.nodeName.toLowerCase(), 'div');
+        assert.ok(i1.root !== i2.root);
+
+        assert.equal(i1.title.nodeName.toLowerCase(), 'h1');
+        assert.equal(i2.title.nodeName.toLowerCase(), 'h1');
+        assert.ok(i1.title !== i2.title);
 
         assert.end();
 

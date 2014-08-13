@@ -1,9 +1,11 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.terrier=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = terrier;
+module.exports = exports = terrier;
+exports.compile = compile;
+
+var pluck = require('pluck-elements');
 
 var doc         = (typeof document !== 'undefined') ? document : null;
-var mapperFn    = function(el) { return el; };
-var ATTR        = 'data-pluck';
+var mapperFn    = null;
 var EMPTY       = {};
 
 module.exports.setDocument = function(_doc) {
@@ -15,18 +17,13 @@ module.exports.setNodeMapper = function(_fn) {
 }
 
 function terrier(html, opts) {
-
+    var el = templateToNode(html);
     opts = opts || EMPTY;
+    return pluck(el, opts.attribute, opts.mapNode || mapperFn);
+}
 
-    var map = opts.mapNode || mapperFn;
-    var attr = opts.attribute || ATTR;
-    var el  = templateToNode(html);
-
-    var plucked = pluckDesignatedElements(el, attr, map);
-    plucked.root = map(el);
-
-    return plucked;
-
+function compile(html, opts) {
+    return new Template(html, opts || EMPTY);
 }
 
 function templateToNode(html) {
@@ -40,7 +37,34 @@ function templateToNode(html) {
     return null;
 }
 
-function pluckDesignatedElements(root, attr, map) {
+function Template(html, opts) {
+    this._frag = doc.createDocumentFragment();
+    this._frag.appendChild(templateToNode(html));
+    this._attr = opts.attribute;
+    this._mapNode = opts.mapNode || mapperFn;
+}
+
+Template.prototype.instance = function() {
+    return pluck(
+        this._frag.cloneNode(true).childNodes[0],
+        this._attr,
+        this._mapNode
+    );
+}
+},{"pluck-elements":2}],2:[function(require,module,exports){
+module.exports = pluck;
+
+var DEFAULT_ATTR    = 'data-pluck';
+var IDENTITY        = function(n) { return n; }
+
+function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '');
+}
+
+function pluck(root, attr, map) {
+
+    attr = attr || DEFAULT_ATTR;
+    map = map || IDENTITY;
 
     var plucked = {};
 
@@ -62,13 +86,15 @@ function pluckDesignatedElements(root, attr, map) {
         var el = els[i];
         var key = el.getAttribute(attr);
         if (key.indexOf(' ') >= 0) {
-            key.trim().split(/\s+/).forEach(function(k) {
+            trim(key).split(/\s+/).forEach(function(k) {
                 _addOne(k, el);
             });
         } else {
             _addOne(key, el);
         }
     }
+
+    plucked.root = map(root);
 
     return plucked;
 

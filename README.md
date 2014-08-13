@@ -69,6 +69,10 @@ Supported `options`:
   * `attribute`: name of attribute used to denote elements to be plucked into the returned structure. Defaults to `data-pluck`.
   * `mapNode`: a callback that may be used to map each plucked element. Defaults to the identity.
 
+#### `terrier.compile(html, [options])`
+
+As above, but compiles `html` into an efficient, reusable template. Returns a template object; call `instance()` on this to create any number of template instances, each with its own unique DOM hierarchy.
+
 ## Copyright &amp; License
 
 &copy; 2014 Jason Frame [ [@jaz303](http://twitter.com/jaz303) / [jason@onehackoranother.com](mailto:jason@onehackoranother.com) ]

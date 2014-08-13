@@ -1,8 +1,10 @@
-module.exports = terrier;
+module.exports = exports = terrier;
+exports.compile = compile;
+
+var pluck = require('pluck-elements');
 
 var doc         = (typeof document !== 'undefined') ? document : null;
-var mapperFn    = function(el) { return el; };
-var ATTR        = 'data-pluck';
+var mapperFn    = null;
 var EMPTY       = {};
 
 module.exports.setDocument = function(_doc) {
@@ -14,18 +16,13 @@ module.exports.setNodeMapper = function(_fn) {
 }
 
 function terrier(html, opts) {
-
+    var el = templateToNode(html);
     opts = opts || EMPTY;
+    return pluck(el, opts.attribute, opts.mapNode || mapperFn);
+}
 
-    var map = opts.mapNode || mapperFn;
-    var attr = opts.attribute || ATTR;
-    var el  = templateToNode(html);
-
-    var plucked = pluckDesignatedElements(el, attr, map);
-    plucked.root = map(el);
-
-    return plucked;
-
+function compile(html, opts) {
+    return new Template(html, opts || EMPTY);
 }
 
 function templateToNode(html) {
@@ -39,36 +36,17 @@ function templateToNode(html) {
     return null;
 }
 
-function pluckDesignatedElements(root, attr, map) {
+function Template(html, opts) {
+    this._frag = doc.createDocumentFragment();
+    this._frag.appendChild(templateToNode(html));
+    this._attr = opts.attribute;
+    this._mapNode = opts.mapNode || mapperFn;
+}
 
-    var plucked = {};
-
-    function _addOne(k, el) {
-        if (k.substr(-2, 2) === '[]') {
-            k = k.slice(0, -2);
-            if (!(k in plucked))
-                plucked[k] = [];
-            if (!Array.isArray(plucked[k]))
-                throw new Error("type mismatch - existing element for plucked key '" + k + "' is not an array");
-            plucked[k].push(map(el));
-        } else {
-            plucked[k] = map(el);
-        }
-    }
-
-    var els = root.querySelectorAll('[' + attr + ']');
-    for (var i = 0; i < els.length; ++i) {
-        var el = els[i];
-        var key = el.getAttribute(attr);
-        if (key.indexOf(' ') >= 0) {
-            key.trim().split(/\s+/).forEach(function(k) {
-                _addOne(k, el);
-            });
-        } else {
-            _addOne(key, el);
-        }
-    }
-
-    return plucked;
-
+Template.prototype.instance = function() {
+    return pluck(
+        this._frag.cloneNode(true).childNodes[0],
+        this._attr,
+        this._mapNode
+    );
 }
