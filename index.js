@@ -26,6 +26,9 @@ function compile(html, opts) {
 }
 
 function templateToNode(html) {
+    if (typeof html.nodeType !== 'undefined') {
+        return html;
+    }
     var wrapper = doc.createElement('div');
     wrapper.innerHTML = html;
     for (var i = 0, l = wrapper.childNodes.length; i < l; ++i) {
